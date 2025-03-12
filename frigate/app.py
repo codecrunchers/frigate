@@ -15,7 +15,7 @@ from playhouse.sqlite_ext import SqliteExtDatabase
 
 import frigate.util as util
 from frigate.api.auth import hash_password
-from frigate.api.fastapi_app import create_fastapi_app
+from frigate.api.fastapi_app import create_fastapi_app, create_config_editor_app
 from frigate.camera import CameraMetrics, PTZMetrics
 from frigate.comms.config_updater import ConfigPublisher
 from frigate.comms.dispatcher import Communicator, Dispatcher
@@ -79,7 +79,11 @@ logger = logging.getLogger(__name__)
 
 
 class FrigateApp:
-    def __init__(self, config: FrigateConfig) -> None:
+    def __init__(self, config: Optional[FrigateConfig]) -> None:
+        if not config:
+            self.start_config_editor()
+            return
+
         self.audio_process: Optional[mp.Process] = None
         self.stop_event: MpEvent = mp.Event()
         self.detection_queue: Queue = mp.Queue()
@@ -580,6 +584,30 @@ class FrigateApp:
                 logger.info(f"***    Password: {password}   ***")
                 logger.info("********************************************************")
                 logger.info("********************************************************")
+
+
+    def start_config_editor(self) -> None:
+        logger.info(f"Starting Frigate in Config Editor Mode  ({VERSION})")
+        # Ensure global state.
+        self.ensure_dirs()
+        self.init_auth()
+
+        try:
+            uvicorn.run(
+                create_config_editor_app("", ["errors"]),
+                host="127.0.0.1",
+                port=5001,
+                log_level="error",
+            )
+        finally:
+            self.stop()
+
+    def stop(self) -> None:
+        logger.info("Stopping...")
+        self.stop_event.set()
+        os._exit(os.EX_OK)
+
+
 
     def start(self) -> None:
         logger.info(f"Starting Frigate ({VERSION})")

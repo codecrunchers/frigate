@@ -1,5 +1,5 @@
 import logging
-from typing import Optional
+from typing import Optional, List
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -123,3 +123,27 @@ def create_fastapi_app(
     app.jwt_token = get_jwt_secret() if frigate_config.auth.enabled else None
 
     return app
+
+def create_config_editor_app(
+    bad_config: str,
+    config_errors: Optional[List] = None
+) -> FastAPI:
+
+    app = FastAPI(
+        debug=True,
+        swagger_ui_parameters={"apisSorter": "alpha", "operationsSorter": "alpha"},
+    )
+
+    # Include only the minimal routes for config editing and auth
+    app.include_router(auth.router)
+    app.include_router(main_app.router)
+
+    # Store the bad config and its errors in the app state.
+    # This object can be used by the UI to display errors and allow in-app editing.
+    app.frigate_config = {
+        "config": bad_config,
+        "errors": config_errors if config_errors is not None else []
+    }
+
+    return app
+

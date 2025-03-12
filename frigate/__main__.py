@@ -49,7 +49,7 @@ def main() -> None:
         print("*************************************************************")
         print("***    End Config Validation Errors                       ***")
         print("*************************************************************")
-        sys.exit(1)
+        FrigateApp(None).start_config_editor()
     if args.validate_config:
         print("*************************************************************")
         print("*** Your config file is valid.                            ***")
