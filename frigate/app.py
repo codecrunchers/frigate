@@ -592,11 +592,9 @@ class FrigateApp:
 
         def stop_config_editor() -> None:
             logger.info("Stopping...")
-            self.stop_event.set()
             os._exit(os.EX_OK)
 
         try:
-
             uvicorn.run(
                 create_config_editor_app(
                     self.config,

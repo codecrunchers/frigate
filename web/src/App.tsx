@@ -10,6 +10,7 @@ import { Suspense, lazy } from "react";
 import { Redirect } from "./components/navigation/Redirect";
 import { cn } from "./lib/utils";
 import { isPWA } from "./utils/isPWA";
+import ConfigProtection from "@/components/settings/ConfigProtection.tsx";
 
 const Live = lazy(() => import("@/pages/Live"));
 const Events = lazy(() => import("@/pages/Events"));
@@ -41,17 +42,19 @@ function App() {
             >
               <Suspense>
                 <Routes>
-                  <Route index element={<Live />} />
-                  <Route path="/events" element={<Redirect to="/review" />} />
-                  <Route path="/review" element={<Events />} />
-                  <Route path="/explore" element={<Explore />} />
-                  <Route path="/export" element={<Exports />} />
-                  <Route path="/system" element={<System />} />
-                  <Route path="/settings" element={<Settings />} />
                   <Route path="/config" element={<ConfigEditor />} />
-                  <Route path="/logs" element={<Logs />} />
-                  <Route path="/playground" element={<UIPlayground />} />
-                  <Route path="*" element={<Redirect to="/" />} />
+                  <Route element={<ConfigProtection />}>
+                    <Route index element={<Live />} />
+                    <Route path="/events" element={<Redirect to="/review" />} />
+                    <Route path="/review" element={<Events />} />
+                    <Route path="/explore" element={<Explore />} />
+                    <Route path="/export" element={<Exports />} />
+                    <Route path="/system" element={<System />} />
+                    <Route path="/settings" element={<Settings />} />
+                    <Route path="/logs" element={<Logs />} />
+                    <Route path="/playground" element={<UIPlayground />} />
+                    <Route path="*" element={<Redirect to="/" />} />
+                  </Route>
                 </Routes>
               </Suspense>
             </div>

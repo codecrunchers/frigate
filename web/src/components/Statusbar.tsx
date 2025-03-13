@@ -43,11 +43,7 @@ export default function Statusbar() {
       );
     });
     if (invalidConfig) {
-      addMessage(
-        "stats",
-        "Invalid config - fix config only",
-        "text-danger",
-      );
+      addMessage("stats", "Invalid config - fix config only", "text-danger");
     }
   }, [potentialProblems, invalidConfig, addMessage, clearMessages]);
 
@@ -69,7 +65,11 @@ export default function Statusbar() {
   }, [reindexState, addMessage, clearMessages]);
 
   return (
-    <div className="absolute bottom-0 left-0 right-0 z-10 flex h-8 w-full items-center justify-between border-t border-secondary-highlight bg-background_alt px-4 dark:text-secondary-foreground">
+    <div
+      className={`absolute bottom-0 left-0 right-0 z-10 flex h-8 w-full items-center justify-between border-t border-secondary-highlight ${
+        invalidConfig ? "bg-red-500 bg-opacity-75" : "bg-background_alt"
+      } px-4 dark:text-secondary-foreground`}
+    >
       <div className="flex h-full items-center gap-2">
         {cpuPercent && (
           <Link to="/system#general">
