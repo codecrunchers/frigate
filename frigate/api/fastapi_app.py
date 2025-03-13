@@ -141,28 +141,8 @@ def create_config_editor_app(
         middleware.ContextMiddleware,
         plugins=(plugins.ForwardedForPlugin(),),
     )
-    app.state.show_warning_banner = "true"
+
     app.add_middleware(SlowAPIMiddleware)
-
-    # Middleware to connect to DB before and close connection after request
-    @app.middleware("http")
-    async def frigate_middleware(request: Request, call_next):
-        # Before request
-        if not check_csrf(request):
-            return JSONResponse(
-                content={"success": False, "message": "Missing CSRF header"},
-                status_code=401,
-            )
-
-        if database.is_closed():
-            database.connect()
-
-        response = await call_next(request)
-
-        # After request
-        if not database.is_closed():
-            database.close()
-        return response
 
     @app.on_event("startup")
     async def startup():
