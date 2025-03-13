@@ -17,7 +17,6 @@ from pydantic import (
     model_validator,
 )
 from ruamel.yaml import YAML
-
 from typing_extensions import Self
 
 from frigate.const import REGEX_JSON

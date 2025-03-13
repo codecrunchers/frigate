@@ -8,6 +8,7 @@ from typing import Optional, Union
 
 from ruamel.yaml import YAML
 from ruamel.yaml.scanner import ScannerError
+
 from frigate.const import CONFIG_DIR, EXPORT_DIR
 from frigate.util.services import get_video_properties
 

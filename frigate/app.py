@@ -15,7 +15,7 @@ from playhouse.sqlite_ext import SqliteExtDatabase
 
 import frigate.util as util
 from frigate.api.auth import hash_password
-from frigate.api.fastapi_app import create_fastapi_app, create_config_editor_app
+from frigate.api.fastapi_app import create_config_editor_app, create_fastapi_app
 from frigate.camera import CameraMetrics, PTZMetrics
 from frigate.comms.config_updater import ConfigPublisher
 from frigate.comms.dispatcher import Communicator, Dispatcher
@@ -28,7 +28,6 @@ from frigate.comms.mqtt import MqttClient
 from frigate.comms.webpush import WebPushClient
 from frigate.comms.ws import WebSocketClient
 from frigate.comms.zmq_proxy import ZmqProxy
-from frigate.config.base import FrigateBaseModel
 from frigate.config.config import FrigateConfig
 from frigate.const import (
     CACHE_DIR,

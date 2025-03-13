@@ -1,7 +1,6 @@
 import logging
-from typing import Optional, List
+from typing import Optional
 
-import fastapi
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from playhouse.sqliteq import SqliteQueueDatabase
@@ -125,18 +124,8 @@ def create_fastapi_app(
 
     return app
 
-# import re
-# from fastapi import FastAPI, Request, Response
-# from fastapi.responses import HTMLResponse, JSONResponse
-# from starlette.middleware.base import BaseHTTPMiddleware
-#
-# import re
-from fastapi import FastAPI, Request, Response
-from fastapi.responses import HTMLResponse, JSONResponse
-import re
-from fastapi import FastAPI, Request, Response
-from fastapi.responses import HTMLResponse, JSONResponse
-from starlette.middleware.base import BaseHTTPMiddleware
+
+
 
 def create_config_editor_app(
         frigate_config: FrigateConfig,
