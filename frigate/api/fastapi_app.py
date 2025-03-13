@@ -1,6 +1,7 @@
 import logging
-from typing import Optional
+from typing import Optional, List
 
+import fastapi
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from playhouse.sqliteq import SqliteQueueDatabase
@@ -120,6 +121,77 @@ def create_fastapi_app(
     app.stats_emitter = stats_emitter
     app.event_metadata_updater = event_metadata_updater
     app.external_processor = external_processor
+    app.jwt_token = get_jwt_secret() if frigate_config.auth.enabled else None
+
+    return app
+
+# import re
+# from fastapi import FastAPI, Request, Response
+# from fastapi.responses import HTMLResponse, JSONResponse
+# from starlette.middleware.base import BaseHTTPMiddleware
+#
+# import re
+from fastapi import FastAPI, Request, Response
+from fastapi.responses import HTMLResponse, JSONResponse
+import re
+from fastapi import FastAPI, Request, Response
+from fastapi.responses import HTMLResponse, JSONResponse
+from starlette.middleware.base import BaseHTTPMiddleware
+
+def create_config_editor_app(
+        frigate_config: FrigateConfig,
+        database: SqliteQueueDatabase,
+) -> FastAPI:
+
+    app = FastAPI(
+        debug=True,
+        swagger_ui_parameters={"apisSorter": "alpha", "operationsSorter": "alpha"},
+    )
+
+    app.add_middleware(
+        middleware.ContextMiddleware,
+        plugins=(plugins.ForwardedForPlugin(),),
+    )
+    app.state.show_warning_banner = "true"
+    app.add_middleware(SlowAPIMiddleware)
+
+    # Middleware to connect to DB before and close connection after request
+    @app.middleware("http")
+    async def frigate_middleware(request: Request, call_next):
+        # Before request
+        if not check_csrf(request):
+            return JSONResponse(
+                content={"success": False, "message": "Missing CSRF header"},
+                status_code=401,
+            )
+
+        if database.is_closed():
+            database.connect()
+
+        response = await call_next(request)
+
+        # After request
+        if not database.is_closed():
+            database.close()
+        return response
+
+    @app.on_event("startup")
+    async def startup():
+        logger.info("FastAPI started")
+
+    # Rate limiter (used for login endpoint)
+    if frigate_config.auth.failed_login_rate_limit is None:
+        limiter.enabled = False
+    else:
+        auth.rateLimiter.set_limit(frigate_config.auth.failed_login_rate_limit)
+
+    app.state.limiter = limiter
+    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+    # Routes
+    app.include_router(auth.router)
+    app.include_router(main_app.router)
+    app.frigate_config = frigate_config
     app.jwt_token = get_jwt_secret() if frigate_config.auth.enabled else None
 
     return app

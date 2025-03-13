@@ -4,6 +4,7 @@ import shutil
 import sys
 
 from ruamel.yaml import YAML
+from ruamel.yaml.scanner import ScannerError
 
 sys.path.insert(0, "/opt/frigate")
 from frigate.const import (
@@ -30,7 +31,7 @@ try:
         config: dict[str, any] = yaml.load(raw_config)
     elif config_file.endswith(".json"):
         config: dict[str, any] = json.loads(raw_config)
-except FileNotFoundError:
+except (FileNotFoundError, ScannerError):
     config: dict[str, any] = {}
 
 path = config.get("ffmpeg", {}).get("path", "default")

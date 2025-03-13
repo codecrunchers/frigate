@@ -9,6 +9,7 @@ import { FaCheck } from "react-icons/fa";
 import { IoIosWarning } from "react-icons/io";
 import { MdCircle } from "react-icons/md";
 import { Link } from "react-router-dom";
+import { useConfigValidator } from "@/hooks/use-config-validator"; // <-- new import
 
 export default function Statusbar() {
   const { messages, addMessage, clearMessages } = useContext(
@@ -28,6 +29,7 @@ export default function Statusbar() {
   }, [stats]);
 
   const { potentialProblems } = useStats(stats);
+  const invalidConfig = useConfigValidator(); // <-- use the hook
 
   useEffect(() => {
     clearMessages("stats");
@@ -40,7 +42,14 @@ export default function Statusbar() {
         problem.relevantLink,
       );
     });
-  }, [potentialProblems, addMessage, clearMessages]);
+    if (invalidConfig) {
+      addMessage(
+        "stats",
+        "Invalid config - fix config only",
+        "text-danger",
+      );
+    }
+  }, [potentialProblems, invalidConfig, addMessage, clearMessages]);
 
   const { payload: reindexState } = useEmbeddingsReindexProgress();
 

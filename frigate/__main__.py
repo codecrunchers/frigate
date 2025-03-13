@@ -5,11 +5,27 @@ import sys
 import threading
 
 from pydantic import ValidationError
+from ruamel.yaml.scanner import ScannerError
 
 from frigate.app import FrigateApp
 from frigate.config import FrigateConfig
 from frigate.log import setup_logging
 
+minimal_config = {
+            "mqtt": {"enabled": "false"},
+            "environment_vars": {
+                "INVALID_CONFIG": "true",
+            },
+            "cameras": {
+                "null": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "/dev/null"}
+                        ]
+                    }
+                }
+            },
+        }
 
 def main() -> None:
     faulthandler.enable()
@@ -33,7 +49,7 @@ def main() -> None:
     # Load the configuration.
     try:
         config = FrigateConfig.load(install=True)
-    except ValidationError as e:
+    except (ValidationError, ScannerError) as e:
         print("*************************************************************")
         print("*************************************************************")
         print("***    Your config file is not valid!                     ***")
@@ -43,13 +59,19 @@ def main() -> None:
         print("*************************************************************")
         print("***    Config Validation Errors                           ***")
         print("*************************************************************")
-        for error in e.errors():
-            location = ".".join(str(item) for item in error["loc"])
-            print(f"{location}: {error['msg']}")
+        if e.__class__ == ValidationError:
+            for error in e.errors():
+                location = ".".join(str(item) for item in error["loc"])
+                print(f"{location}: {error['msg']}")
+        else:
+            print(f"Failed to parse config: {e}")
+
         print("*************************************************************")
         print("***    End Config Validation Errors                       ***")
-        print("*************************************************************")
-        sys.exit(1)
+        print("*************************************************************")       
+
+        FrigateApp(FrigateConfig(**minimal_config)).start_config_editor()
+
     if args.validate_config:
         print("*************************************************************")
         print("*** Your config file is valid.                            ***")
